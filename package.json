@@ -1,0 +1,15 @@
+{
+  "name": "backend-challenge",
+  "version": "1.0.0",
+  "esy": {
+    "build": "dune build -w",
+    "start": "dune exec src/backend.exe"
+  },
+  "dependencies": {
+    "@opam/dune": "*",
+    "@opam/opium": "0.20.0",
+    "@opam/ppx_deriving_yojson": "3.6.1",
+    "@opam/yojson": "1.7.0",
+    "ocaml": "4.12.x"
+  }
+}
