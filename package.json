@@ -1,14 +1,18 @@
 {
   "name": "backend-challenge",
   "version": "1.0.0",
-  "esy": {
-    "build": "dune build -w",
-    "start": "dune exec src/backend.exe"
-  },
+  "esy": { "build": "dune build -w" },
   "dependencies": {
+    "@opam/caqti": "1.6.0",
+    "@opam/caqti-driver-postgresql": "1.6.0",
+    "@opam/caqti-lwt": "1.6.0",
+    "@opam/ctypes-foreign": "0.4.0",
     "@opam/dune": "*",
     "@opam/opium": "0.20.0",
     "@opam/ppx_deriving_yojson": "3.6.1",
+    "@opam/ppx_rapper": "3.0.0",
+    "@opam/ppx_rapper_lwt": "3.0.0",
+    "@opam/uuidm": "0.9.7",
     "@opam/yojson": "1.7.0",
     "ocaml": "4.12.x"
   }
