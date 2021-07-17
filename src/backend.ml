@@ -1,72 +1,55 @@
 open Opium
 
-type ingredient = { food : string; quantity : string; quantity_unit : string }
-[@@deriving yojson]
-
-type equipment = { tool : string; quantity : string } [@@deriving yojson]
-
-type recipe = {
-  name : string;
-  description : string;
-  ingredients : ingredient list;
-  equipments : equipment list;
-}
-[@@deriving yojson]
-
-type t = recipe list [@@deriving yojson]
-
-let recipe_list = ref []
-
 let ( let* ) = Lwt.bind
 
 let post_recipe request =
-  print_endline (Int.to_string (List.length !recipe_list));
   let* json_option = Request.to_json request in
-  let recipe =
+  let recipe_or_error =
     match json_option with
     | None -> Error "Invalid JSON"
     | Some json -> (
-        match recipe_of_yojson json with
+        match Recipe.recipe_of_yojson json with
         | Error error -> Error ("Malformed recipe in: " ^ error)
         | Ok recipe -> Ok recipe)
   in
-  match recipe with
+
+  match Database.add_recipe recipe_or_error with
   | Error error ->
       Lwt.return
         (Response.make ~status:`Bad_request ~body:(Body.of_string error) ())
-  | Ok recipe ->
-      recipe_list := recipe :: !recipe_list;
-      Lwt.return (Response.make ~status:`OK ())
+  | Ok message ->
+      Lwt.return (Response.make ~status:`OK ~body:(Body.of_string message) ())
 
-let rec drop amount list =
-  if amount > 0 then
-    match list with [] -> [] | _ :: tail -> drop (amount - 1) tail
-  else list
-
-let take amount list =
-  let rec take_acc amount list acc =
-    match list with
-    | [] -> ()
-    | head :: tail ->
-        acc := head :: !acc;
-        if amount > 1 then take_acc (amount - 1) tail acc
-  and acc = ref [] in
-  take_acc amount list acc;
-  !acc
-
-let slice list start amount = drop start list |> take amount
-
-let get_recipes_ordered_in_page request =
-  let _order_by = Router.param request "order"
-  and page = Router.param request "page" |> int_of_string in
+let get_recipes_in_page request =
+  let page = Router.param request "page" |> int_of_string in
   let recipes_per_page = 10 in
-  let result = slice !recipe_list (page * recipes_per_page) recipes_per_page in
+  let* result =
+    Lwt.map Recipe.recipe_list_to_yojson
+      (Database.get_recipes_in_page page recipes_per_page)
+  in
 
-  to_yojson result |> Response.of_json |> Lwt.return
+  result |> Response.of_json |> Lwt.return
+
+let get_recipes_by_ingredient ingredient_id =
+  let* result =
+    Lwt.map Recipe.recipe_list_to_yojson
+      (Database.get_recipes_from_ingredient ingredient_id)
+  in
+
+  result |> Response.of_json |> Lwt.return
+
+let get_recipes_by_ingredient_name request =
+  get_recipes_by_ingredient @@ Router.param request "ingredient_name"
+
+let get_recipes_by_ingredient_id request =
+  get_recipes_by_ingredient @@ Router.param request "ingredient_id"
 
 let () =
   print_endline "Ready";
   App.empty
   |> App.post "/add-recipe" post_recipe
-  |> App.get "/get-recipes/:order/:page" get_recipes_ordered_in_page
+  |> App.get "/get-recipes/:order/:page" get_recipes_in_page
+  |> App.get "/get-recipes/by-name/:ingredient_name"
+       get_recipes_by_ingredient_name
+  |> App.get "/get-recipes/by-id/:ingredient_id" get_recipes_by_ingredient_id
   |> App.run_multicore

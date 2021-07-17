@@ -1,4 +1,13 @@
 (executable
  (name backend)
- (libraries opium ppx_deriving_yojson.runtime)
- (preprocess (pps ppx_deriving_yojson)))
+ (public_name backend)
+ (libraries
+  opium
+  ppx_deriving_yojson.runtime
+  caqti
+  caqti-lwt
+  caqti-driver-postgresql
+  ppx_rapper_lwt
+  uuidm)
+ (preprocess
+  (pps ppx_rapper ppx_deriving_yojson)))
