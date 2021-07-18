@@ -1,6 +1,6 @@
 open Recipe
 
-module type DB = Rapper_helper.CONNECTION
+module type Db = Rapper_helper.CONNECTION
 (* INSERT QUERIES *)
 
 let insert_recipe_query =
@@ -12,7 +12,7 @@ let insert_recipe_query =
       |sql}
       record_in]
 
-let insert_ingredient_query =
+let insert_ingredient_query (ingredient_db : ingredient_db) =
   [%rapper
     execute
       {sql|
@@ -21,20 +21,20 @@ let insert_ingredient_query =
           ( %string{_id}
           , %string{food}
           );
-      |sql}
-      record_in]
+      |sql}]
+    ~_id:ingredient_db._id ~food:ingredient_db.food
 
-let insert_equipment_query =
+let insert_equipment_query (equipment_db : equipment_db) =
   [%rapper
     execute
       {sql|
         INSERT INTO equipment_table
         VALUES( %string{_id}, %string{tool});
-      |sql}
-      record_in]
+      |sql}]
+    ~_id:equipment_db._id ~tool:equipment_db.tool
 
 let insert_ingredient_of_recipe_query ~(recipe_id : string)
-    ~(ingredient : ingredient) =
+    ~(ingredient : ingredient_db) =
   [%rapper
     execute
       {sql|
@@ -49,7 +49,7 @@ let insert_ingredient_of_recipe_query ~(recipe_id : string)
     ~quantity_unit:ingredient.quantity_unit ~quantity:ingredient.quantity
 
 let insert_equipment_of_recipe_query ~(recipe_id : string)
-    ~(equipment : equipment) =
+    ~(equipment : equipment_db) =
   [%rapper
     execute
       {sql|
@@ -74,8 +74,7 @@ let get_recipe_ingredients_query recipe_id_list =
   [%rapper
     get_many
       {sql|
-        SELECT @string{i_of_r.recipe_id},
-        @string{i._id}, @string{i.food},
+        SELECT @string{i_of_r.recipe_id}, @string{i.food},
         @string{i_of_r.quantity}, @string{i_of_r.quantity_unit} 
         FROM ingredient_of_recipe AS i_of_r
         JOIN ingredient_table AS i ON ingredient_id = _id 
@@ -88,7 +87,7 @@ let get_recipe_equipments_query recipe_id_list =
   [%rapper
     get_many
       {sql|
-        SELECT @string{e_of_r.recipe_id}, @string{e._id},
+        SELECT @string{e_of_r.recipe_id},
         @string{e.tool}, @int{e_of_r.quantity} 
         FROM equipment_of_recipe AS e_of_r
         JOIN equipment_table AS e ON equipment_id = _id 
