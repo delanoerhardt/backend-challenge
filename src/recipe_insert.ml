@@ -1,11 +1,14 @@
 open Database_queries
 open Recipe
 
+let lwt_bind_unit a = Lwt.bind a (fun _ -> Lwt.return_unit)
+
 let add_recipe_ingredients ingredients lwt_list =
   List.iter
     (fun ingredient ->
       let ingredient_query =
-        Database_handler.dispatch_query (insert_ingredient_query ingredient)
+        lwt_bind_unit
+        @@ Database_handler.dispatch_query (insert_ingredient_query ingredient)
       in
       lwt_list := ingredient_query :: !lwt_list;
       ())
@@ -15,7 +18,8 @@ let add_recipe_equipments equipments lwt_list =
   List.iter
     (fun equipment ->
       let equipment_query =
-        Database_handler.dispatch_query (insert_equipment_query equipment)
+        lwt_bind_unit
+        @@ Database_handler.dispatch_query (insert_equipment_query equipment)
       in
       lwt_list := equipment_query :: !lwt_list;
       ())
@@ -46,8 +50,9 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
       let recipe_uuid = Uuid_handler.get_uuid () in
 
       let recipe_lwt =
-        Database_handler.dispatch_query
-          (insert_recipe_query { _id = recipe_uuid; name; description })
+        lwt_bind_unit
+        @@ Database_handler.dispatch_query
+             (insert_recipe_query { _id = recipe_uuid; name; description })
       in
 
       let ingredients_db_list =
@@ -74,15 +79,10 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
       add_recipe_ingredients ingredients_db_list lwt_list;
       add_recipe_equipments equipments_db_list lwt_list;
 
-      lwt_list :=
-        List.map
-          (fun p -> Lwt.catch (fun _ -> p) (fun _ -> Lwt.return_unit))
-          !lwt_list;
-
       let entities_inserts = Lwt.join !lwt_list in
 
       let _connections_insert =
-        Lwt.bind entities_inserts (fun _ ->
+        Lwt.bind entities_inserts (fun _a ->
             add_recipe_connections recipe_uuid equipments_db_list
               ingredients_db_list;
             Lwt.return_unit)

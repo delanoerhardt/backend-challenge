@@ -13,8 +13,5 @@ let connection_pool =
 let dispatch_query f =
   let* result = Caqti_lwt.Pool.use f connection_pool in
   match result with
-  | Ok data -> Lwt.return data
-  | Error error ->
-      let error_message = "Query failed with:\n" ^ Caqti_error.show error in
-      let _ = print_endline error_message in
-      Lwt.fail_with error_message
+  | Ok data -> Lwt.return @@ Ok data
+  | Error error -> Lwt.return @@ Error error

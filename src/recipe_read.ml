@@ -13,19 +13,25 @@ let fill_recipes (recipe_db_list : recipe_db list) =
       (get_recipe_ingredients_query recipe_id_list)
   in
   let ingredients_of_recipes =
-    List.map
-      (fun (recipe_id, food, quantity, quantity_unit) ->
-        (recipe_id, { food; quantity; quantity_unit }))
-      ingredients_of_recipes_tuple
+    match ingredients_of_recipes_tuple with
+    | Ok ingredients_of_recipes_tuple ->
+        List.map
+          (fun (recipe_id, food, quantity, quantity_unit) ->
+            (recipe_id, { food; quantity; quantity_unit }))
+          ingredients_of_recipes_tuple
+    | Error _ -> []
   in
 
   let* equipments_of_recipes_tuple =
     Database_handler.dispatch_query (get_recipe_equipments_query recipe_id_list)
   in
   let equipments_of_recipes =
-    List.map
-      (fun (recipe_id, tool, quantity) -> (recipe_id, { tool; quantity }))
-      equipments_of_recipes_tuple
+    match equipments_of_recipes_tuple with
+    | Ok equipments_of_recipes_tuple ->
+        List.map
+          (fun (recipe_id, tool, quantity) -> (recipe_id, { tool; quantity }))
+          equipments_of_recipes_tuple
+    | Error _ -> []
   in
 
   let ingredients_ref = ref ingredients_of_recipes in
@@ -59,17 +65,21 @@ let fill_recipes (recipe_db_list : recipe_db list) =
   |> Lwt.return
 
 let get_recipes_in_page (page : int) (recipes_per_page : int) =
-  let* recipe_db_list =
+  let* recipe_db_list_result =
     Database_handler.dispatch_query
       (get_recipe_page_query ~recipes_skipped:(page * recipes_per_page)
          ~recipes_per_page)
   in
 
-  fill_recipes recipe_db_list
+  match recipe_db_list_result with
+  | Ok recipe_db_list -> fill_recipes recipe_db_list
+  | Error _ -> Lwt.return []
 
 let get_recipes_from_ingredient ingredient_id =
-  let* recipe_db_list =
+  let* recipe_db_list_result =
     Database_handler.dispatch_query (get_recipes_by_ingredient ~ingredient_id)
   in
 
-  fill_recipes recipe_db_list
+  match recipe_db_list_result with
+  | Ok recipe_db_list -> fill_recipes recipe_db_list
+  | Error _ -> Lwt.return []
