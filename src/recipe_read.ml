@@ -31,21 +31,24 @@ let fill_recipes (recipe_db_list : recipe_db list) =
   let ingredients_ref = ref ingredients_of_recipes in
   let equipments_ref = ref equipments_of_recipes in
 
-  let rec inner compare_value list_ref acc () =
+  let rec inner compare_value list_ref acc =
     match !list_ref with
     | [] -> ()
     | head :: tail ->
         if fst head = compare_value then (
           acc := snd head :: !acc;
-          inner compare_value (ref tail) acc ())
+          list_ref := tail;
+          inner compare_value list_ref acc)
   in
 
   List.map
     (fun (recipe : recipe_db) ->
       let current_ingredients = ref [] in
       let current_equipments = ref [] in
-      inner recipe._id ingredients_ref current_ingredients ();
-      inner recipe._id equipments_ref current_equipments ();
+
+      inner recipe._id ingredients_ref current_ingredients;
+      inner recipe._id equipments_ref current_equipments;
+
       {
         name = recipe.name;
         description = recipe.description;

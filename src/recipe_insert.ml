@@ -74,6 +74,11 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
       add_recipe_ingredients ingredients_db_list lwt_list;
       add_recipe_equipments equipments_db_list lwt_list;
 
+      lwt_list :=
+        List.map
+          (fun p -> Lwt.catch (fun _ -> p) (fun _ -> Lwt.return_unit))
+          !lwt_list;
+
       let entities_inserts = Lwt.join !lwt_list in
 
       let _connections_insert =
