@@ -43,7 +43,7 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
   match recipe_or_error with
   | Error error -> Error error
   | Ok { name; description; ingredients; equipments } ->
-      let recipe_uuid = Database_handler.get_uuid () in
+      let recipe_uuid = Uuid_handler.get_uuid () in
 
       let recipe_lwt =
         Database_handler.dispatch_query
@@ -54,7 +54,7 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
         List.map
           (fun ({ food; quantity; quantity_unit } : ingredient) ->
             {
-              _id = Database_handler.get_uuid_from_string food;
+              _id = Uuid_handler.get_uuid_from_string food;
               food;
               quantity;
               quantity_unit;
@@ -65,7 +65,7 @@ let add_recipe (recipe_or_error : (Recipe.recipe, string) result) =
       let equipments_db_list =
         List.map
           (fun ({ tool; quantity } : equipment) ->
-            { _id = Database_handler.get_uuid_from_string tool; tool; quantity })
+            { _id = Uuid_handler.get_uuid_from_string tool; tool; quantity })
           equipments
       in
 

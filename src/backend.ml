@@ -41,7 +41,7 @@ let get_recipes_by_ingredient ingredient_id =
 
 let get_recipes_by_ingredient_name request =
   Router.param request "ingredient_name"
-  |> Database_handler.get_uuid_from_string |> get_recipes_by_ingredient
+  |> Uuid_handler.get_uuid_from_string |> get_recipes_by_ingredient
 
 let get_recipes_by_ingredient_id request =
   Router.param request "ingredient_id" |> get_recipes_by_ingredient
