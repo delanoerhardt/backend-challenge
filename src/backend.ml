@@ -40,17 +40,17 @@ let get_recipes_by_ingredient ingredient_id =
   result |> Response.of_json |> Lwt.return
 
 let get_recipes_by_ingredient_name request =
-  Router.param request "ingredient_name" |> get_recipes_by_ingredient
+  Router.param request "ingredient_name"
+  |> Database_handler.get_uuid_from_string |> get_recipes_by_ingredient
 
 let get_recipes_by_ingredient_id request =
-  Router.param request "ingredient_id"
-  |> Database_handler.get_uuid_from_string |> get_recipes_by_ingredient
+  Router.param request "ingredient_id" |> get_recipes_by_ingredient
 
 let () =
   print_endline "Ready";
   App.empty
   |> App.post "/add-recipe" post_recipe
-  |> App.get "/get-recipes/:order/:page" get_recipes_in_page
+  |> App.get "/get-recipes/:page" get_recipes_in_page
   |> App.get "/get-recipes/by-name/:ingredient_name"
        get_recipes_by_ingredient_name
   |> App.get "/get-recipes/by-id/:ingredient_id" get_recipes_by_ingredient_id
