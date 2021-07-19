@@ -50,7 +50,7 @@ CREATE TABLE equipment_of_recipe
 (
  recipe_id    uuid NOT NULL,
  equipment_id uuid NOT NULL,
- quantity int NOT NULL,
+ quantity     int NOT NULL,
  CONSTRAINT PK_equipment_of_recipe PRIMARY KEY ( recipe_id, equipment_id ),
  CONSTRAINT FK_53 FOREIGN KEY ( equipment_id ) REFERENCES equipment_table ( _id ),
  CONSTRAINT FK_56 FOREIGN KEY ( recipe_id ) REFERENCES recipe_table ( _id )
