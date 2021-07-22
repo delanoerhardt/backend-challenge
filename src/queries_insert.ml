@@ -47,9 +47,9 @@ let insert_ingredients_query ingredients =
   let sql =
     Printf.sprintf
       {|
-      INSERT INTO ingredient_table VALUES %s
-      ON CONFLICT DO NOTHING;
-    |}
+        INSERT INTO ingredient_table VALUES %s
+        ON CONFLICT DO NOTHING;
+      |}
   in
 
   gen_insert_rows_query 2 Caqti_type.(tup2 string string) ingredients sql

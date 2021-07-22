@@ -5,12 +5,12 @@ let ( let* ) = Lwt.bind
 let post_recipe request =
   let* json_option = Request.to_json request in
 
-  let add_recipe_result =
+  let* add_recipe_result =
     match json_option with
-    | None -> Error "Invalid JSON"
+    | None -> Lwt.return @@ Error "Invalid JSON"
     | Some json -> (
         match Recipe.recipe_of_yojson json with
-        | Error error -> Error ("Malformed recipe in: " ^ error)
+        | Error error -> Lwt.return @@ Error ("Malformed recipe in: " ^ error)
         | Ok recipe -> Recipe_insert.add_recipe recipe)
   in
 

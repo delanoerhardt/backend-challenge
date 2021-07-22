@@ -70,5 +70,5 @@ let add_recipe { name; description; ingredients; equipments } =
       entities_inserts
   in
 
-  Ok "Recipe added sucessfully"
+  Lwt.return @@ Ok "Recipe added sucessfully"
 (* Can't really know if it's really Ok here, but will be left as is for now *)
