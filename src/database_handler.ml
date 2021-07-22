@@ -1,5 +1,3 @@
-module type DB = Rapper_helper.CONNECTION
-
 let ( let* ) = Lwt.bind
 
 let connection_pool =
@@ -14,4 +12,6 @@ let dispatch_query f =
   let* result = Caqti_lwt.Pool.use f connection_pool in
   match result with
   | Ok data -> Lwt.return @@ Ok data
-  | Error error -> Lwt.return @@ Error error
+  | Error error ->
+      print_endline (Caqti_error.show error);
+      Lwt.return @@ Error error

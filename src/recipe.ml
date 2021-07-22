@@ -28,3 +28,6 @@ type equipment_db = { _id : string; tool : string; quantity : int }
 type recipe_db = { _id : string; name : string; description : string }
 
 type recipe_list = recipe list [@@deriving yojson]
+
+type recipes_with_uuid = { recipes : recipe list; last_seen_id : string }
+[@@deriving yojson]

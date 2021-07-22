@@ -22,22 +22,29 @@ let post_recipe request =
       Lwt.return (Response.make ~status:`OK ~body:(Body.of_string message) ())
 
 let get_recipes_in_page request =
-  let page = Router.param request "page" |> int_of_string in
-  let recipes_per_page = 10 in
-  let* result =
-    Lwt.map Recipe.recipe_list_to_yojson
-      (Recipe_read.get_recipes_in_page page recipes_per_page)
+  let recipes_per_page = 8 in
+  let last_seen_id =
+    try Router.param request "last_seen_id"
+    with Not_found -> "00000000-0000-0000-0000-000000000000"
   in
 
-  result |> Response.of_json |> Lwt.return
+  let* result = Recipe_read.get_recipes_in_page last_seen_id recipes_per_page in
+
+  match result with
+  | Error error ->
+      Response.of_plain_text ~status:`Bad_request error |> Lwt.return
+  | Ok result ->
+      Recipe.recipes_with_uuid_to_yojson result
+      |> Response.of_json |> Lwt.return
 
 let get_recipes_by_ingredient ingredient_id =
-  let* result =
-    Lwt.map Recipe.recipe_list_to_yojson
-      (Recipe_read.get_recipes_from_ingredient ingredient_id)
-  in
+  let* result = Recipe_read.get_recipes_from_ingredient ingredient_id in
 
-  result |> Response.of_json |> Lwt.return
+  match result with
+  | Error error ->
+      Response.of_plain_text ~status:`Bad_request error |> Lwt.return
+  | Ok result ->
+      Recipe.recipe_list_to_yojson result |> Response.of_json |> Lwt.return
 
 let get_recipes_by_ingredient_name request =
   Router.param request "ingredient_name"
@@ -48,9 +55,11 @@ let get_recipes_by_ingredient_id request =
 
 let () =
   print_endline "Ready";
+
   App.empty
   |> App.post "/add-recipe" post_recipe
-  |> App.get "/get-recipes/:page" get_recipes_in_page
+  |> App.get "/get-recipes/" get_recipes_in_page
+  |> App.get "/get-recipes/:last_seen_id" get_recipes_in_page
   |> App.get "/get-recipes/by-name/:ingredient_name"
        get_recipes_by_ingredient_name
   |> App.get "/get-recipes/by-id/:ingredient_id" get_recipes_by_ingredient_id
