@@ -5,16 +5,16 @@ let ( let* ) = Lwt.bind
 let post_recipe request =
   let* json_option = Request.to_json request in
 
-  let recipe_or_error =
+  let add_recipe_result =
     match json_option with
     | None -> Error "Invalid JSON"
     | Some json -> (
         match Recipe.recipe_of_yojson json with
         | Error error -> Error ("Malformed recipe in: " ^ error)
-        | Ok recipe -> Ok recipe)
+        | Ok recipe -> Recipe_insert.add_recipe recipe)
   in
 
-  match Recipe_insert.add_recipe recipe_or_error with
+  match add_recipe_result with
   | Error error ->
       Lwt.return
         (Response.make ~status:`Bad_request ~body:(Body.of_string error) ())

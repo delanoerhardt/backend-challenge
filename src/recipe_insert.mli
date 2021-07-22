@@ -1,1 +1,1 @@
-val add_recipe : (Recipe.recipe, string) result -> (string, string) result
+val add_recipe : Recipe.recipe -> (string, string) result
