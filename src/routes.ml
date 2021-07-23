@@ -22,8 +22,6 @@ let post_recipe request =
       Lwt.return (Response.make ~status:`OK ~body:(Body.of_string message) ())
 
 let get_recipes_in_page request =
-  let start_time = Sys.time () in
-
   let recipes_per_page = 8 in
   let last_seen_id =
     try Router.param request "last_seen_id"
@@ -31,8 +29,6 @@ let get_recipes_in_page request =
   in
 
   let* result = Recipe_read.get_recipes_in_page last_seen_id recipes_per_page in
-
-  print_endline @@ Printf.sprintf "%1.6F" (Sys.time () -. start_time);
 
   match result with
   | Error error ->
