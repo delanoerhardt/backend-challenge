@@ -1,4 +1,4 @@
-open Recipe
+open Types
 open Query_gen
 
 let insert_recipe_query =

@@ -1,4 +1,4 @@
-open Recipe
+open Types
 
 module type Db = Rapper_helper.CONNECTION
 

@@ -9,7 +9,7 @@ let post_recipe request =
     match json_option with
     | None -> Lwt.return @@ Error "Invalid JSON"
     | Some json -> (
-        match Recipe.recipe_of_yojson json with
+        match Types.recipe_of_yojson json with
         | Error error -> Lwt.return @@ Error ("Malformed recipe in: " ^ error)
         | Ok recipe -> Recipe_insert.add_recipe recipe)
   in
@@ -38,8 +38,7 @@ let get_recipes_in_page request =
   | Error error ->
       Response.of_plain_text ~status:`Bad_request error |> Lwt.return
   | Ok result ->
-      Recipe.recipes_with_uuid_to_yojson result
-      |> Response.of_json |> Lwt.return
+      Types.recipes_with_uuid_to_yojson result |> Response.of_json |> Lwt.return
 
 let get_recipes_by_ingredient ingredient_id =
   let* result = Recipe_read.get_recipes_from_ingredient ingredient_id in
@@ -48,7 +47,7 @@ let get_recipes_by_ingredient ingredient_id =
   | Error error ->
       Response.of_plain_text ~status:`Bad_request error |> Lwt.return
   | Ok result ->
-      Recipe.recipe_list_to_yojson result |> Response.of_json |> Lwt.return
+      Types.recipe_list_to_yojson result |> Response.of_json |> Lwt.return
 
 let get_recipes_by_ingredient_name request =
   Router.param request "ingredient_name"

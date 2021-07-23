@@ -1,5 +1,5 @@
 open Queries_insert
-open Recipe
+open Types
 
 let lwt_bind_unit a = Lwt.bind a (fun _ -> Lwt.return_unit)
 
@@ -26,9 +26,8 @@ let add_recipe { name; description; ingredients; equipments } =
   let recipe_id = Uuid_handler.get_uuid () in
 
   let recipe_lwt =
-    lwt_bind_unit
-    @@ Database_handler.dispatch_query
-         (insert_recipe_query { _id = recipe_id; name; description })
+    Database_handler.dispatch_query
+      (insert_recipe_query { _id = recipe_id; name; description })
   in
 
   let ingredient_list = ref [] in
@@ -46,11 +45,11 @@ let add_recipe { name; description; ingredients; equipments } =
 
   let lwt_list =
     [
-      recipe_lwt;
-      Lwt.map (fun _ -> ())
+      lwt_bind_unit recipe_lwt;
+      lwt_bind_unit
       @@ Database_handler.dispatch_query
            (insert_ingredients_query !ingredient_list);
-      Lwt.map (fun _ -> ())
+      lwt_bind_unit
       @@ Database_handler.dispatch_query
            (insert_equipments_query !equipment_list);
     ]

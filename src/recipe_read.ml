@@ -1,5 +1,5 @@
 open Queries_read
-open Recipe
+open Types
 
 let ( let* ) = Lwt.bind
 
@@ -18,7 +18,7 @@ let map_result f list_result =
 let fill_recipes ?(last_seen_id = "00000000-0000-0000-0000-000000000000")
     recipe_db_list =
   let recipe_id_list =
-    List.map (fun ({ _id; _ } : Recipe.recipe_db) -> _id) recipe_db_list
+    List.map (fun ({ _id; _ } : recipe_db) -> _id) recipe_db_list
   in
 
   let ingredients_of_recipes_tuple =
