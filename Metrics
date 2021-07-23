@@ -1,0 +1,11 @@
+wrk -t10 -c200 -d10s http://localhost:3000/get-recipes/ -s scripts/get_recipes.lua
+
+~1.5k requests
+
+wrk -t10 -c200 -d10s http://localhost:3000/add-recipe -s scripts/add_recipes.lua
+
+about 20k requests
+
+wrk -t10 -c200 -d10s http://localhost:3000/get-recipes/by-name/irmao -s scripts/get_recipes_by_ingredient.lua
+
+~1.2k requests
