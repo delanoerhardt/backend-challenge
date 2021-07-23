@@ -2,7 +2,7 @@ let ( let* ) = Lwt.bind
 
 let connection_pool =
   match
-    Caqti_lwt.connect_pool ~max_size:5
+    Caqti_lwt.connect_pool ~max_size:20
       (Uri.of_string "postgresql://postgres:password@localhost:5432")
   with
   | Ok pool -> pool
@@ -10,6 +10,7 @@ let connection_pool =
 
 let dispatch_query f =
   let* result = Caqti_lwt.Pool.use f connection_pool in
+
   match result with
   | Ok data -> Lwt.return @@ Ok data
   | Error error ->
