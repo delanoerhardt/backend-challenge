@@ -45,6 +45,7 @@ let get_recipes_by_ingredient =
         SELECT @string{name}, @string{_id}, @string{description}
         FROM ingredient_of_recipe JOIN recipe_table ON _id = recipe_id
         WHERE ingredient_id = %string{ingredient_id}
-        ORDER BY _id;
+        ORDER BY _id
+        LIMIT 200;
       |sql}
       function_out] (fun ~description ~_id ~name -> { _id; name; description })
