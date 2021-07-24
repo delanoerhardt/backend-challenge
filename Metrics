@@ -6,6 +6,6 @@ wrk -t10 -c200 -d10s http://localhost:3000/add-recipe -s scripts/add_recipes.lua
 
 100-700 requests
 
-wrk -t10 -c200 -d10s http://localhost:3000/recipes-with-ingredient/by-name/irmao -s scripts/get_recipes.lua
+wrk -t10 -c200 -d10s http://localhost:3000/recipes-with-ingredient/by-name/yeast3895349
 
 ~1k requests
